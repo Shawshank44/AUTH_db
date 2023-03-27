@@ -97,12 +97,7 @@ class Database {
             throw new Error('cluster does not exists')
         }
         const read = JSON.parse(fs.readFileSync(clusterpath))
-        const exists = read.some(obj => obj === data)
-    
-        if (!exists && Duplicate === true) {
-            read.push(data)
-        }
- 
+        read.push(data)
         fs.writeFileSync(clusterpath,JSON.stringify(read))
     }
     Query(databaseName,clustername,QUERY_FUNCTION){
@@ -145,14 +140,14 @@ const db = new Database()
 // db.createdatabase('mydatabase')
 // db.createAuthModel('mydatabase','users')
 // db.signAuth('mydatabase','users',{name : 'rehul',email : 'rehul.bs@mail.com',password:'rehul'},true)
-// const authsign =  db.Authenticate('mydatabase','users',{name : 'mehul',email : 'mehul.bs@mail.com',password:'mehul'}); console.log(authsign);
-// db.updatesign('mydatabase','users',row => row.name ==='mehul',{phonenumber:988654321},true)
+// const authsign =  db.Authenticate('mydatabase','users',{name : 'rehul',email : 'rehul.bs@mail.com',password:'rehul'}); console.log(authsign);
+// db.updatesign('mydatabase','users',row => row.name ==='rehul',{phonenumber:988654321},true)
 // db.deletesign('mydatabase','users',deletes => deletes.name === 'mehul')
 
 
 // db.createcluster('mydatabase','orders')
-// db.insert('mydatabase','orders',{orderno : 269,phonenumber:988654321,product:'fan'},true)
-// const qery = db.Query('mydatabase','orders',()=>true); console.log(qery);
+// db.insert('mydatabase','orders',{orderno : 266,phonenumber:988654321,product:'fan'})
+const qery = db.Query('mydatabase','orders',()=>true); console.log(qery);
 // db.update('mydatabase','orders',row=>row.phonenumber === 988654322,{orderscoms : 891})
 // db.delete('mydatabase','orders',(row)=>row.phonenumber === 988654322)
 
