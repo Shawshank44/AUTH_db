@@ -23,7 +23,7 @@ class Database {
             fs.writeFileSync(rootpath,JSON.stringify([]))
         }
     }
-    signAuth(databaseName,Authname,signdata,encrypt){
+    signAuth(databaseName,Authname,signdata,encrypt,allowDuplicate = false){
         const rootpath =`${databaseName}/auth/${Authname}.json`
         const read = JSON.parse(fs.readFileSync(rootpath))
 
@@ -32,12 +32,12 @@ class Database {
               signdata.password = hash
         }
 
-        const exists = read.some(obj => obj.password === signdata.password)
+        const exists = read.some(obj =>obj.email === signdata.email && obj.password === signdata.password)
 
-        if (!exists) {
+        if(!exists || allowDuplicate){
             read.push(signdata)
-        }
-        fs.writeFileSync(rootpath,JSON.stringify(read))
+            fs.writeFileSync(rootpath,JSON.stringify(read))
+        }   
     }
     Authenticate(databaseName,Authname,signdata){
         const rootpath =`${databaseName}/auth/${Authname}.json`
@@ -48,11 +48,11 @@ class Database {
               signdata.password = hash
         }
 
-        const filter = read.filter(data=>data.password === signdata.password)
-        if (!filter) {
-           return 'no auth in model'
+        const filters = read.filter(data=>data.email === signdata.email && data.password === signdata.password)
+        if (filters.length === 0) {
+            throw new Error('Authentication failed')
         }else{
-            return filter
+            return filters
         }
 
     }
@@ -82,6 +82,13 @@ class Database {
         read = deletes
         fs.writeFileSync(rootpath,JSON.stringify(read))
     }
+    displayAuths(databaseName,Authname,filters){
+        const rootpath =`${databaseName}/auth/${Authname}.json`
+        let read = JSON.parse(fs.readFileSync(rootpath))
+        const queries = read.filter(filters)
+        return queries
+    }
+
     // End of auth
 
     createcluster(databaseName,clustername){
@@ -91,14 +98,19 @@ class Database {
         }
         fs.writeFileSync(clusterpath,JSON.stringify([]))
     }
-    insert(databaseName,clustername,data,Duplicate){
+    insert(databaseName,clustername,data,allowDuplicate = false){
         const clusterpath = path.join(databaseName,`${clustername}.json`)
         if (!fs.existsSync(clusterpath)) {
             throw new Error('cluster does not exists')
         }
         const read = JSON.parse(fs.readFileSync(clusterpath))
-        read.push(data)
-        fs.writeFileSync(clusterpath,JSON.stringify(read))
+        const isduplicate = read.some(item =>{
+            return JSON.stringify(item) === JSON.stringify(data)
+        })
+        if (!isduplicate|| allowDuplicate) {
+            read.push(data)
+            fs.writeFileSync(clusterpath,JSON.stringify(read))
+        }
     }
     Query(databaseName,clustername,QUERY_FUNCTION){
         const clusterpath = path.join(databaseName,`${clustername}.json`)
@@ -139,17 +151,19 @@ class Database {
 const db = new Database()
 // db.createdatabase('mydatabase')
 // db.createAuthModel('mydatabase','users')
-// db.signAuth('mydatabase','users',{name : 'rehul',email : 'rehul.bs@mail.com',password:'rehul'},true)
+// db.signAuth('mydatabase','users',{name : 'rehul',email : 'rehul.bs@mail.com',password:'rehul'},true,false)
 // const authsign =  db.Authenticate('mydatabase','users',{name : 'rehul',email : 'rehul.bs@mail.com',password:'rehul'}); console.log(authsign);
 // db.updatesign('mydatabase','users',row => row.name ==='rehul',{phonenumber:988654321},true)
+// console.log(db.displayAuths('mydatabase','users',()=>true));
 // db.deletesign('mydatabase','users',deletes => deletes.name === 'mehul')
 
 
 // db.createcluster('mydatabase','orders')
-// db.insert('mydatabase','orders',{orderno : 266,phonenumber:988654321,product:'fan'})
-const qery = db.Query('mydatabase','orders',()=>true); console.log(qery);
-// db.update('mydatabase','orders',row=>row.phonenumber === 988654322,{orderscoms : 891})
-// db.delete('mydatabase','orders',(row)=>row.phonenumber === 988654322)
+// db.insert('mydatabase','orders',{orderno : 277,phonenumber:988654321,product:'pan'},true)
+// const qery = db.Query('mydatabase','orders',(row)=> row.phonenumber === 988654321); console.log(qery);
+// const qery1 = db.Query('mydatabase','orders',()=>true); console.log(qery1); // retures all data
+// db.update('mydatabase','orders',row=>row.phonenumber === 988654321,{orderscoms : 891})
+// db.delete('mydatabase','orders',(row)=>row.product === 'pan')
 
 
 
