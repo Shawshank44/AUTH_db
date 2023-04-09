@@ -88,6 +88,20 @@ class Database {
         const queries = read.filter(filters)
         return queries
     }
+    searchAuth(databaseName,Authname,searchElement){
+        const rootpath =`${databaseName}/auth/${Authname}.json`
+        let read = JSON.parse(fs.readFileSync(rootpath))
+        const results = read.filter(obj=>{
+            const values = Object.values(obj)
+            for (let i = 0; i < values.length; i++) {
+                if ((typeof values[i]=== "string"||typeof values[i]=== "number")&& String(values[i]).includes(searchElement)){
+                    return true
+                }
+            }
+            return false
+        })
+        return results
+    }
 
     // End of auth
 
@@ -146,24 +160,45 @@ class Database {
         read = deleteQuery
         fs.writeFileSync(clusterpath,JSON.stringify(read))
     }
+    search(databaseName,clustername,searchElement){
+        const clusterpath = path.join(databaseName,`${clustername}.json`)
+        if (!fs.existsSync(clusterpath)) {
+            throw new Error('cluster does not exists')
+        }
+        let read = JSON.parse(fs.readFileSync(clusterpath))
+        const results = read.filter(obj=>{
+            const values = Object.values(obj)
+            for (let i = 0; i < values.length; i++) {
+                if ((typeof values[i]=== "string"||typeof values[i]=== "number")&& String(values[i]).includes(searchElement)){
+                    return true
+                }
+            }
+            return false
+        })
+        return results
+    }
+
+
 }
 
 const db = new Database()
 // db.createdatabase('mydatabase')
 // db.createAuthModel('mydatabase','users')
-// db.signAuth('mydatabase','users',{name : 'rehul',email : 'rehul.bs@mail.com',password:'rehul'},true,false)
+// db.signAuth('mydatabase','users',{name : 'shashank',email : 'shashank.bs@mail.com',password:'shashank'},true,false)
 // const authsign =  db.Authenticate('mydatabase','users',{name : 'rehul',email : 'rehul.bs@mail.com',password:'rehul'}); console.log(authsign);
-// db.updatesign('mydatabase','users',row => row.name ==='rehul',{phonenumber:988654321},true)
+// db.updatesign('mydatabase','users',row => row.name ==='shashank',{phonenumber:988654322},true)
 // console.log(db.displayAuths('mydatabase','users',()=>true));
 // db.deletesign('mydatabase','users',deletes => deletes.name === 'mehul')
+// console.log(db.searchAuth('mydatabase','users','a'));
 
 
 // db.createcluster('mydatabase','orders')
-// db.insert('mydatabase','orders',{orderno : 277,phonenumber:988654321,product:'pan'},true)
+// db.insert('mydatabase','orders',{orderno : 279,phonenumber:988654322,product:'shan'},false)
 // const qery = db.Query('mydatabase','orders',(row)=> row.phonenumber === 988654321); console.log(qery);
 // const qery1 = db.Query('mydatabase','orders',()=>true); console.log(qery1); // retures all data
 // db.update('mydatabase','orders',row=>row.phonenumber === 988654321,{orderscoms : 891})
 // db.delete('mydatabase','orders',(row)=>row.product === 'pan')
+// console.log(db.search('mydatabase','orders','sl'));
 
 
 
